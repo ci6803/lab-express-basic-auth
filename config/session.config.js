@@ -2,7 +2,7 @@
 
 // require session
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const MongoStore = require("connect-mongo"); // connect MONGO to store the sessions
 const mongoose = require("mongoose");
 
 // since we are going to USE this middleware in the app.js,
@@ -18,15 +18,19 @@ module.exports = (app) => {
   //use session
   app.use(
     session({
-      secret: process.env.SESS_SECRET,
-      resave: true,
-      saveUninitialized: false,
+      secret: process.env.SESS_SECRET, // a srting (save in .env) allow us to generate the session ID - required (for our cookies and sessions)
+      resave: false, // forces the session to be saved to the session store ('flase' because mongo implements the touch method)
+      // want to automatically store the sessions
+      saveUninitialized: false, // forces a session that is 'uninitialised' (new but not modified) to be saved // recommend to set to 'false'
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // 24h
+        maxAge: 1000 * 60 * 60 * 24, // 24h // that you want your cookie to be (in ms)
       },
       store: new MongoStore({
+        // connecting between Mongo DB and the session page - so it can extent the accessibility to how long we want
+        // create the database
         mongoUrl: "mongodb://localhost/lab-express-basic-auth",
-        ttl: 1000 * 60 * 60 * 24, // 60sec * 60min * 24h => 1 day
+        ttl: 60 * 60 * 24, // 60sec * 60min * 24h => 1 day (in s)
+        // (not mandatory; default: 14 days) time to live in the database
       }),
     })
   );
